@@ -163,7 +163,7 @@ export default class ExtensionManager {
    * @private
    * @param {Object[]} commandDefinitions
    */
-  _initCommandsModule(commandDefinitions, defaultContext = 'VIEWER') {
+  _initCommandsModule(commandDefinitions, defaultContext) {
     if (!this._commandsManager.getContext(defaultContext)) {
       this._commandsManager.createContext(defaultContext);
     }

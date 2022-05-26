@@ -1,7 +1,6 @@
 import cornerstone from 'cornerstone-core';
 import cornerstoneTools from 'cornerstone-tools';
 import OHIF from '@ohif/core';
-
 import setCornerstoneLayout from './utils/setCornerstoneLayout.js';
 import { getEnabledElement } from './state';
 import CornerstoneViewportDownloadForm from './CornerstoneViewportDownloadForm';
@@ -13,6 +12,7 @@ const { setViewportSpecificData } = OHIF.redux.actions;
 const refreshCornerstoneViewports = () => {
   cornerstone.getEnabledElements().forEach(enabledElement => {
     if (enabledElement.image) {
+      console.log(enabledElement.image)
       cornerstone.updateImage(enabledElement.element);
     }
   });
@@ -294,6 +294,7 @@ const commandsModule = ({ servicesManager }) => {
         refreshCornerstoneViewports();
       }
     },
+
   };
 
   const definitions = {
@@ -400,7 +401,7 @@ const commandsModule = ({ servicesManager }) => {
     },
     setCornerstoneLayout: {
       commandFn: actions.setCornerstoneLayout,
-      storeContexts: [],
+      storeContexts: ['viewports'],
       options: {},
       context: 'VIEWER',
     },

@@ -128,6 +128,16 @@ const definitions = [
     ],
   },
   {
+    id: 'newFilter',
+    label: 'newFilter',
+    icon: 'cube',
+    //
+    CustomComponent: VTKMPRToolbarButton,
+    type: TOOLBAR_BUTTON_TYPES.COMMAND,
+    commandName: 'newFilter',
+    context: 'ACTIVE_VIEWPORT::CORNERSTONE',
+  },
+  {
     id: '2DMPR',
     label: '2D MPR',
     icon: 'cube',
@@ -137,6 +147,8 @@ const definitions = [
     commandName: 'mpr2d',
     context: 'ACTIVE_VIEWPORT::CORNERSTONE',
   },
+
+
 ];
 
 export default {

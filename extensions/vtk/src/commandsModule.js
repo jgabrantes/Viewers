@@ -11,7 +11,9 @@ import setMPRLayout from './utils/setMPRLayout.js';
 import setViewportToVTK from './utils/setViewportToVTK.js';
 import Constants from 'vtk.js/Sources/Rendering/Core/VolumeMapper/Constants.js';
 import OHIFVTKViewport from './OHIFVTKViewport';
-
+import metadataProvider from '../../../platform/core/src/classes/MetadataProvider.js';
+import OHIF from '@ohif/core';
+import processPixelArray from './processPixelArray.js';
 const { BlendMode } = Constants;
 
 const commandsModule = ({ commandsManager, servicesManager }) => {
@@ -124,7 +126,7 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
     resetMPRView() {
       // Reset orientation
       apis.forEach(api => api.resetOrientation());
-
+      console.log(apis);
       // Reset VOI
       if (defaultVOI) setVOI(defaultVOI);
 
@@ -133,8 +135,8 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
     },
     axial: async ({ viewports }) => {
       const api = await _getActiveViewportVTKApi(viewports);
-
-      apis[viewports.activeViewportIndex] = api;
+      const data = api.
+        apis[viewports.activeViewportIndex] = api;
 
       _setView(api, [0, 0, 1], [0, -1, 0]);
     },
@@ -177,7 +179,7 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
       segmentNumber,
       frameIndex,
       frame,
-      done = () => {},
+      done = () => { },
     }) => {
       let api = apis[viewports.activeViewportIndex];
 
@@ -487,6 +489,91 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
         }
       }
     },
+    send2Python: async ({ viewports }) => {
+
+      // get the imageDataObject from the current Series
+      const displaySet =
+        viewports.viewportSpecificData[viewports.activeViewportIndex];
+
+
+      const study = metadataProvider._getAndCacheStudy(displaySet.StudyInstanceUID);
+
+      const { StackManager } = OHIF.utils;
+      const storedStack = StackManager.findOrCreateStack(study, displaySet);
+      // Clone the stack here so we don't mutate it
+      const stack = Object.assign({}, storedStack);
+
+      const imageDataObject = getImageData(
+        stack.imageIds,
+        displaySet.displaySetInstanceUID
+      );
+
+      // Create buffer the size of the 3D volume
+      const dimensions = imageDataObject.dimensions;
+      const width = dimensions[0];
+      const height = dimensions[1];
+      const depth = dimensions[2];
+      const numVolumePixels = width * height * depth;
+
+      // If you want to load a segmentation labelmap, you would want to load
+      // it into this array at this point.
+
+      const threeDimensionalPixelData = new Uint16Array(numVolumePixels).buffer;
+      for (var i = 0; i < depth; i++) {
+        cornerstone.loadImage(stack.imageIds[i]).then(image => {
+          threeDimensionalPixelData[i] = image.getPixelData();
+          //console.log(threeDimensionalPixelData[i]);
+          //console.log(threeDimensionalPixelData[i]);
+        });
+      }
+      console.log(threeDimensionalPixelData);
+      //send buffer to opencv Image processor.
+      processPixelArray(threeDimensionalPixelData).then(function (data) {
+        console.log(data)
+      });
+      /*
+            const imageIds = imageDataObject.imageIds;
+            const numberOfFrames = imageIds.length;
+
+            if (numberOfFrames !== depth) {
+              throw new Error('Depth should match the number of imageIds');
+            }
+
+            // Use Float32Arrays in cornerstoneTools for interoperability.
+            segmentationModule.configuration.arrayType = 1;
+
+            segmentationModule.setters.labelmap3DByFirstImageId(
+              imageIds[0],
+              buffer,
+              0,
+              [],
+              numberOfFrames,
+              undefined,
+              0
+            );
+
+            // Create VTK Image Data with buffer as input
+            const labelMap = vtkImageData.newInstance();
+
+            // right now only support 256 labels
+            const dataArray = vtkDataArray.newInstance({
+              numberOfComponents: 1, // labelmap with single component
+              values: threeDimensionalPixelData,
+            });
+
+            labelMap.getPointData().setScalars(dataArray);
+            labelMap.setDimensions(...dimensions);
+            labelMap.setSpacing(...imageDataObject.vtkImageData.getSpacing());
+            labelMap.setOrigin(...imageDataObject.vtkImageData.getOrigin());
+            labelMap.setDirection(...imageDataObject.vtkImageData.getDirection());
+
+
+
+
+            */
+
+
+    },
   };
 
   window.vtkActions = actions;
@@ -576,16 +663,24 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
         change: -3,
       },
     },
+    newFilter: {
+      commandFn: actions.send2Python,
+      storeContexts: ['viewports'],
+      options: {},
+      context: 'VIEWER',
+    },
     mpr2d: {
       commandFn: actions.mpr2d,
       storeContexts: ['viewports'],
       options: {},
       context: 'VIEWER',
     },
+
     getVtkApiForViewportIndex: {
       commandFn: actions.getVtkApis,
       context: 'VIEWER',
     },
+
   };
 
   return {
