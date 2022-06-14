@@ -518,19 +518,30 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
       // If you want to load a segmentation labelmap, you would want to load
       // it into this array at this point.
 
-      const threeDimensionalPixelData = new Uint16Array(numVolumePixels).buffer;
-      for (var i = 0; i < depth; i++) {
-        cornerstone.loadImage(stack.imageIds[i]).then(image => {
-          threeDimensionalPixelData[i] = image.getPixelData();
-          //console.log(threeDimensionalPixelData[i]);
-          //console.log(threeDimensionalPixelData[i]);
+      const threeDimensionalPixelData = []; //new Uint16Array(numVolumePixels).buffer;
+      threeDimensionalPixelData[0] = width;
+      threeDimensionalPixelData[1] = height;
+      threeDimensionalPixelData[2] = depth;
+      const promises = stack.imageIds.map(imageId => {
+
+        cornerstone.loadImage(imageId).then(image => {
+          threeDimensionalPixelData.push(Object.values(image.getPixelData()));// = image.getPixelData();
+
+
         });
-      }
-      console.log(threeDimensionalPixelData);
-      //send buffer to opencv Image processor.
-      processPixelArray(threeDimensionalPixelData).then(function (data) {
-        console.log(data)
       });
+
+
+      Promise.all(promises).then(() => {
+
+        //send buffer to opencv Image processor.
+
+        processPixelArray(threeDimensionalPixelData).then(function (data) {
+          console.log("chegou");
+          console.log(data)
+        });
+      });
+
       /*
             const imageIds = imageDataObject.imageIds;
             const numberOfFrames = imageIds.length;

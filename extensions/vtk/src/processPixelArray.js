@@ -7,6 +7,7 @@ export default async function processPixelArray(pixelArray) {
     var xhr = new XMLHttpRequest();
 
     const data = JSON.stringify(pixelArray);
+
     xhr.onreadystatechange = function () {
       if (this.readyState == 4 && this.status == 200) {
         const res = new Uint16Array(this.response)
