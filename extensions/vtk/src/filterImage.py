@@ -28,21 +28,25 @@ class NumpyArrayEncoder(JSONEncoder):
 def filterImage():
     data = request.data
     dataPixels = json.loads(data)
-    #print(dataPixels[2], ",", dataPixels[1], ",", dataPixels[0])
+    # print(dataPixels[2], ",", dataPixels[1], ",", dataPixels[0])
     arrayNP = np.array(dataPixels[3:], dtype=np.uint16)
-    # print(np.shape(arrayNP))
+    print(np.shape(arrayNP))
     image = np.reshape(arrayNP, (dataPixels[2], dataPixels[1], dataPixels[0]))
-
+    # print(image)
     kernel = np.ones((5, 5), np.uint16)/25
+    processedSlices = np.empty(np.shape(image), dtype=np.uint16)
     for slice in image:
-        slice = cv2.filter2D(slice, -1, kernel)
-    image = np.reshape(image, arrayNP.size)
-    print(image)
+        np.append(processedSlices, cv2.filter2D(slice, -1, kernel))
+    image = np.reshape(processedSlices, arrayNP.size)
+
+    print("ola-", image)
 
     image = image.tobytes()
     response = flask.make_response(image)
+    print(response)
     response.headers.set('Content-Type', 'application/octet-stream')
-    return Response(flask.make_response,  headers={'Access-Control-Allow-Origin': '*'})
+    # return Response(response,  headers={'Access-Control-Allow-Origin': '*'})
+    return(response)
 
 
 if __name__ == "__main__":

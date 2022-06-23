@@ -14,6 +14,7 @@ import OHIFVTKViewport from './OHIFVTKViewport';
 import metadataProvider from '../../../platform/core/src/classes/MetadataProvider.js';
 import OHIF from '@ohif/core';
 import processPixelArray from './processPixelArray.js';
+import applyNewImage from './applyNewImage.js';
 const { BlendMode } = Constants;
 
 const commandsModule = ({ commandsManager, servicesManager }) => {
@@ -491,6 +492,8 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
     },
     send2Python: async ({ viewports }) => {
 
+      //get current element
+      const dom = commandsManager.runCommand('getActiveViewportEnabledElement');
       // get the imageDataObject from the current Series
       const displaySet =
         viewports.viewportSpecificData[viewports.activeViewportIndex];
@@ -518,28 +521,31 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
       // If you want to load a segmentation labelmap, you would want to load
       // it into this array at this point.
 
-      const threeDimensionalPixelData = []; //new Uint16Array(numVolumePixels).buffer;
+      var threeDimensionalPixelData = []; //new Uint16Array(numVolumePixels).buffer;
       threeDimensionalPixelData[0] = width;
       threeDimensionalPixelData[1] = height;
       threeDimensionalPixelData[2] = depth;
+      var original = cornerstone.image;
       const promises = stack.imageIds.map(imageId => {
 
         cornerstone.loadImage(imageId).then(image => {
+          original = image;
           threeDimensionalPixelData.push(Object.values(image.getPixelData()));// = image.getPixelData();
-
+          console.log(threeDimensionalPixelData);
 
         });
       });
 
-
       Promise.all(promises).then(() => {
-
         //send buffer to opencv Image processor.
 
         processPixelArray(threeDimensionalPixelData).then(function (data) {
+
           console.log("chegou");
-          console.log(data)
+          console.log(data);
+          applyNewImage(dom, data, original);
         });
+
       });
 
       /*

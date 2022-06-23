@@ -3,8 +3,8 @@ import setLayoutAndViewportData from './setLayoutAndViewportData.js';
 export default function setMPRLayout(
   displaySet,
   viewportPropsArray,
-  numRows = 1,
-  numColumns = 1
+  numRows = 2,
+  numColumns = 2
 ) {
   return new Promise((resolve, reject) => {
     const viewports = [];
@@ -47,8 +47,8 @@ export default function setMPRLayout(
 
     setLayoutAndViewportData(
       {
-        numRows,
-        numColumns,
+        numRows: 2,
+        numColumns: 2,
         viewports,
       },
       viewportSpecificData
