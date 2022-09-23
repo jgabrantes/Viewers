@@ -15,7 +15,10 @@ import metadataProvider from '../../../platform/core/src/classes/MetadataProvide
 import OHIF from '@ohif/core';
 import processPixelArray from './processPixelArray.js';
 import applyNewImage from './applyNewImage.js';
+import loadSeg from './loadSeg.js';
 const { BlendMode } = Constants;
+
+const { studyMetadataManager } = OHIF.utils;
 
 const commandsModule = ({ commandsManager, servicesManager }) => {
   const { UINotificationService, LoggerService } = servicesManager.services;
@@ -511,6 +514,7 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
         displaySet.displaySetInstanceUID
       );
 
+
       // Create buffer the size of the 3D volume
       const dimensions = imageDataObject.dimensions;
       const width = dimensions[0];
@@ -531,7 +535,7 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
         cornerstone.loadImage(imageId).then(image => {
           original = image;
           threeDimensionalPixelData.push(Object.values(image.getPixelData()));// = image.getPixelData();
-          console.log(threeDimensionalPixelData);
+
 
         });
       });
@@ -542,8 +546,8 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
         processPixelArray(threeDimensionalPixelData).then(function (data) {
 
           console.log("chegou");
-          console.log(data);
-          applyNewImage(dom, data, original);
+          console.log(data)
+          //loadSeg(stack.imageIds, studyMetadataManager);
         });
 
       });
