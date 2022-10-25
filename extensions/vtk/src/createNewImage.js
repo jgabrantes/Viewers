@@ -1,11 +1,13 @@
 import cornerstone from 'cornerstone-core';
-import getSopClassHandlerModule from '../../default/src/getSopClassHandlerModule.js';
-import getSOPInstanceAttributes from './utils/measurementServiceMappings/utils/getSOPInstanceAttributes';
-import DisplaySetService from '@ohif/core/src/services/DisplaySetService/DisplaySetService';
-import DicomMetadataStore from '@ohif/core/src/services/DicomMetadataStore/DicomMetadataStore';
-export default async function createNewImage(element, pixelArray, image) {
-  //cornerstone.enable(element);
 
+export default async function createNewImage(element, pixelArray, image) {
+
+
+
+  const tamanho = image.getPixelData().length
+
+
+  console.log(pixelArray);
   function getPixelData() {
     const width = image.width;
     const height = image.height;
@@ -17,7 +19,7 @@ export default async function createNewImage(element, pixelArray, image) {
 
 
   const dynamicImage = {
-    imageId: "processed",
+    imageId: image.imageId,
     minPixelValue: image.minPixelValue,
     maxPixelValue: image.maxPixelValue,
     slope: image.slope,
@@ -35,34 +37,32 @@ export default async function createNewImage(element, pixelArray, image) {
     rowPixelSpacing: image.rowPixelSpacing,
     invert: image.invert,
     sizeInBytes: image.sizeInBytes,
+    falseColor: image.falseColor,
+    colormap: image.colormap,
     data: {
       opacity: image.opacity
     }
   };
 
-  const {
-    SOPInstanceUID,
-    FrameOfReferenceUID,
-    SeriesInstanceUID,
-    StudyInstanceUID,
-  } = getSOPInstanceAttributes(element);
 
-  /*// Subscribe to new displaySets as the source may come in after.
-  DisplaySetService.subscribe(DisplaySetService.EVENTS.DISPLAY_SETS_CHANGED,
-    data => {
-      const { displaySetsAdded } = data;
-      // If there are still some measurements that have not yet been loaded into cornerstone,
-      // See if we can load them onto any of the new displaySets.
-      displaySetsAdded.forEach(newDisplaySet => {
-        console.log(getDisplaySetForSOPInstanceUID(SOPInstanceUID, SeriesInstanceUID));
+  /*
+      Subscribe to new displaySets as the source may come in after.
+      DisplaySetService.subscribe(DisplaySetService.EVENTS.DISPLAY_SETS_CHANGED,
+        data => {
+          const { displaySetsAdded } = data;
+          // If there are still some measurements that have not yet been loaded into cornerstone,
+          // See if we can load them onto any of the new displaySets.
+          displaySetsAdded.forEach(newDisplaySet => {
+            console.log(getDisplaySetForSOPInstanceUID(SOPInstanceUID, SeriesInstanceUID));
 
-      });
-    }
-  );
-  console.log(displaySet);
-*/
+          });
+        }
+      );
+    console.log(displaySet);
 
-  cornerstone.displayImage(element, dynamicImage);
 
+    //cornerstone.displayImage(element, dynamicImage);
+    console.log(dynamicImage);
+     */
   return dynamicImage;
 }

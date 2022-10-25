@@ -131,7 +131,6 @@ const definitions = [
     id: 'newFilter',
     label: 'newFilter',
     icon: 'cube',
-    //
     CustomComponent: VTKMPRToolbarButton,
     type: TOOLBAR_BUTTON_TYPES.COMMAND,
     commandName: 'newFilter',

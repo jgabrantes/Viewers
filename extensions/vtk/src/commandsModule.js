@@ -16,6 +16,9 @@ import OHIF from '@ohif/core';
 import processPixelArray from './processPixelArray.js';
 import applyNewImage from './applyNewImage.js';
 import loadSeg from './loadSeg.js';
+import PostProcessingDownloadPanel from './PostProcessingDownloadPanel.js';
+import aggregateData from './aggregateData.js';
+
 const { BlendMode } = Constants;
 
 const { studyMetadataManager } = OHIF.utils;
@@ -130,7 +133,6 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
     resetMPRView() {
       // Reset orientation
       apis.forEach(api => api.resetOrientation());
-      console.log(apis);
       // Reset VOI
       if (defaultVOI) setVOI(defaultVOI);
 
@@ -535,8 +537,6 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
         cornerstone.loadImage(imageId).then(image => {
           original = image;
           threeDimensionalPixelData.push(Object.values(image.getPixelData()));// = image.getPixelData();
-
-
         });
       });
 
@@ -545,8 +545,14 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
 
         processPixelArray(threeDimensionalPixelData).then(function (data) {
 
-          console.log("chegou");
-          console.log(data)
+          console.log(data);
+          var average = data[data.length - 1];
+          aggregateData(average);
+          commandsManager.runCommand('showPostProcessingPanel', {
+            title: ('Processing Results'),
+            dataPixels: data.slice(0, data.length - 1),
+            results: average
+          });
           //loadSeg(stack.imageIds, studyMetadataManager);
         });
 
@@ -587,13 +593,23 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
             labelMap.setSpacing(...imageDataObject.vtkImageData.getSpacing());
             labelMap.setOrigin(...imageDataObject.vtkImageData.getOrigin());
             labelMap.setDirection(...imageDataObject.vtkImageData.getDirection());
-
-
-
-
             */
-
-
+    },
+    showPostProcessingPanel: ({ title, viewports, dataPixels, results }) => {
+      const activeViewportIndex = viewports.activeViewportIndex;
+      const { UIModalService } = servicesManager.services;
+      console.log(dataPixels);
+      if (UIModalService) {
+        UIModalService.show({
+          content: PostProcessingDownloadPanel,
+          title,
+          contentProps: {
+            activeViewportIndex,
+            onClose: UIModalService.hide,
+            dataPixels, results
+          },
+        });
+      }
     },
   };
 
@@ -700,6 +716,12 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
     getVtkApiForViewportIndex: {
       commandFn: actions.getVtkApis,
       context: 'VIEWER',
+    },
+    showPostProcessingPanel: {
+      commandFn: actions.showPostProcessingPanel,
+      storeContexts: ['viewports'],
+      options: {},
+      context: 'VIEWER'
     },
 
   };

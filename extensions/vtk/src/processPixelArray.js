@@ -11,6 +11,7 @@ export default async function processPixelArray(pixelArray) {
     xhr.onreadystatechange = function () {
       if (this.readyState == 4 && this.status == 200) {
         const res = new Uint16Array(this.response)
+        console.log(res)
         resolve(res);
       }
     };

@@ -43,7 +43,9 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.5.5",
-    "core-js": "^3.2.1"
+    "core-js": "^3.2.1",
+    "jspdf": "^2.5.1",
+    "pdfkit": "^0.13.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.0",

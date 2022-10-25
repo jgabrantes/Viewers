@@ -1,8 +1,51 @@
 <!DOCTYPE html>
 <html>
+  <style type="text/css">
+    .tg  {border-collapse:collapse;border-spacing:0;}
+    .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+      overflow:hidden;padding:10px 5px;word-break:normal;}
+    .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+      font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+    .tg .tg-0lax{text-align:left;vertical-align:top}
+    </style>
 <body>
 
-<h1>The Results are:</h1>
-<p>{{ results }}</p>
+<h1>Post-Processing Report:</h1>
+<table class="tg">
+  <thead>
+    <tr>
+
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="tg-0lax">Name</td>
+      <td class="tg-0lax">{{Name}}</td>
+    </tr>
+    <tr>
+      <td class="tg-0lax">Modality</td>
+      <td class="tg-0lax">{{Modality}}</td>
+    </tr>
+    <tr>
+      <td class="tg-0pky">Weight</td>
+      <td class="tg-0lax">{{Weight}}</td>
+    </tr>
+    <tr>
+      <td class="tg-0pky">Study Date</td>
+      <td class="tg-0lax">{{Date}}</td>
+    </tr>
+    <tr>
+      <td class="tg-0pky">Study Description</td>
+      <td class="tg-0lax">{{Description}}</td>
+    </tr>
+    <tr>
+      <td class="tg-0pky">Hounsfield Units Average</td>
+      <td class="tg-0lax">{{Average}}</td>
+    </tr>
+    <tr>
+      <td class="tg-0lax" colspan="2"><img src="http://127.0.0.1:5000/static/out.png"></td>
+    </tr>
+  </tbody>
+  </table>
 </body>
 </html>

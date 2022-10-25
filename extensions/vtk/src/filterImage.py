@@ -3,6 +3,8 @@ from contextlib import nullcontext
 from ctypes import sizeof
 from email.mime import application
 import json
+from pickletools import uint8
+from sqlite3 import Time
 from unittest import result
 from flask import Flask, request, Response, redirect, url_for, after_this_request
 import flask
@@ -18,6 +20,9 @@ from flask import session
 import requests
 from fpdf import FPDF
 import os
+import datetime as dt
+import pandas
+import imageio
 # Setup flask server
 app = Flask(__name__)
 app.secret_key = "string"
@@ -56,15 +61,23 @@ def filterImage():
         np.append(results, np.average(slice))
     # print(results)
 
+    for slice in results:
+        avrg = np.average(results)
+    np.append(processedSlices, avrg)
+    displaySlice = np.array(processedSlices[0], dtype=np.uint16)
+    displaySlice = (255 * (displaySlice - displaySlice.min()
+                           ) / displaySlice.ptp()).astype(np.uint16)
+    imageio.imwrite("static/out.png",
+                    displaySlice.astype(np.uint16))  # create png
     image = np.reshape(processedSlices, arrayNP.size)
     # print(image)
 
-    image = image.tobytes()  # processed image array
-    response = flask.make_response(image)
+    processedSlices = processedSlices[0].tobytes()  # processed image array
+    response = flask.make_response(processedSlices)
 
     response.headers.set('Content-Type', 'application/octet-stream')
-    res = requests.post('http://127.0.0.1:5000/results',
-                        json=json.dumps(results.tolist()))
+    # res = requests.post('http://127.0.0.1:5000/results',
+    #       json=json.dumps(results.tolist()))
     # webbrowser.open_new('http://127.0.0.1:5000/results/res=hello')
     # return response
     return response
@@ -74,11 +87,16 @@ def filterImage():
 def makePDF():
 
     #results = np.array(json.loads(request.args['results']))
-    data = json.loads(request.data)
-
-    print(data)
+    data = request.form
+    print(data.get("date"))
+    #studyDate = pandas.to_datetime(data.get("date"), format="%Y/%m/%d")
+    studyDate = data.get("date")[6:8] + "/" + \
+        data.get("date")[4:6] + "/" + data.get("date")[0:4]
+    print(data.get("average"))
     rendered = render_template(
-        'pdf_template.html', results=data)
+        'pdf_template.html', Modality=data.get("modality", None), Name=data.get("name"),
+        Weight=data.get("weight"),  Date=studyDate,
+        Description=data.get("description"), Average=data.get("average"))
 
     pdf = pdfkit.from_string(rendered, "static/out.pdf")
     webbrowser.open_new('http://127.0.0.1:5000/static/out.pdf')
